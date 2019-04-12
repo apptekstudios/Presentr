@@ -139,8 +139,12 @@ class PresentrController: UIPresentationController, UIAdaptivePresentationContro
 
     // MARK: - Setup
 
+	var swipeGesture: UIPanGestureRecognizer?
+
     private func setupDismissOnSwipe() {
         let swipe = UIPanGestureRecognizer(target: self, action: #selector(presentedViewSwipe))
+		swipe.delegate = self
+		swipeGesture = swipe
         presentedViewController.view.addGestureRecognizer(swipe)
     }
     
@@ -413,7 +417,22 @@ extension PresentrController {
             return
         }
 
-        var swipeLimit: CGFloat = 100
+		if let scrollView = conformingPresentedController?.scrollViewToTrack ?? nil {
+			switch dismissOnSwipeDirectionFinal {
+			case .bottom:
+				guard scrollView.contentOffset.y <= -scrollView.contentInset.top else {
+					gesture.setTranslation(.zero, in: presentedViewController.view)
+					return
+				}
+			case .top:
+				guard scrollView.contentOffset.y >= scrollView.contentSize.height - scrollView.bounds.height + scrollView.contentInset.bottom else {
+					gesture.setTranslation(.zero, in: presentedViewController.view)
+					return
+				}
+			}
+		}
+
+        var swipeLimit: CGFloat = presentedViewController.view.bounds.height * 0.35
         if dismissOnSwipeDirectionFinal == .top {
             swipeLimit = -swipeLimit
         }
@@ -473,4 +492,10 @@ extension PresentrController {
         }
     }
 
+}
+
+extension PresentrController: UIGestureRecognizerDelegate {
+	func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+		return true
+	}
 }

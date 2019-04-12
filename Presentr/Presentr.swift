@@ -54,6 +54,11 @@ public enum BackgroundTapAction {
      - returns: False if the dismissal should be prevented, otherwise, true if the dimissal should occur.
      */
     @objc optional func presentrShouldDismiss(keyboardShowing: Bool) -> Bool
+
+	/**
+	Asks the delegate if there is a scrollView it should track to avoid swipeToDismiss interfering with scrolling
+	**/
+	@objc optional var scrollViewToTrack: UIScrollView? { get }
 }
 
 /// Main Presentr class. This is the point of entry for using the framework.
